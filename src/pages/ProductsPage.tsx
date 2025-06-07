@@ -1,272 +1,432 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiFilter, FiX, FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import ProductCard from '../components/ui/ProductCard';
 import Button from '../components/ui/Button';
-import { getProductsByCategory } from '../data/products';
-import { getCategoryBySlug, categories } from '../data/categories';
-import { Product } from '../types';
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  salePrice?: number;
+  images: string[];
+  category: string;
+  firmness: string;
+  tags: string[];
+  rating: number;
+  reviewCount: number;
+}
+
+interface FilterState {
+  categories: string[];
+  firmness: string[];
+  priceRange: [number, number];
+  sortBy: string;
+}
 
 const ProductsPage = () => {
-  const { category } = useParams<{ category?: string }>();
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [activeFilters, setActiveFilters] = useState({
-    priceRange: [0, 3000],
-    types: [] as string[],
-    firmness: [] as number[],
-    features: [] as string[],
-  });
-  const [sortOption, setSortOption] = useState('featured');
-  const [expandedSections, setExpandedSections] = useState({
-    price: true,
-    type: true,
-    firmness: true,
-    features: false,
+  const [loading, setLoading] = useState(true);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    categories: [],
+    firmness: [],
+    priceRange: [0, 2000],
+    sortBy: 'featured'
   });
   
-  const categoryInfo = category ? getCategoryBySlug(category) : null;
+  const [expandedSections, setExpandedSections] = useState({
+    categories: true,
+    firmness: true,
+    priceRange: true
+  });
   
   useEffect(() => {
-    document.title = categoryInfo 
-      ? `${categoryInfo.name} | Mattress Philly` 
-      : 'All Mattresses | Mattress Philly';
+    document.title = 'Shop Mattresses | Mattress Philly';
     
-    const fetchedProducts = category 
-      ? getProductsByCategory(category) 
-      : getProductsByCategory('all');
+    // In a real app, fetch products from an API
+    // For now, we'll simulate a product fetch
+    const fetchProducts = async () => {
+      setLoading(true);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Mock product data
+      const mockProducts: Product[] = [
+        {
+          id: '1',
+          name: 'Dreamcloud Luxury Hybrid Mattress',
+          description: 'Experience the perfect balance of comfort and support with our premium hybrid mattress.',
+          price: 1299,
+          salePrice: 899,
+          images: ['https://images.pexels.com/photos/6782567/pexels-photo-6782567.jpeg'],
+          category: 'Hybrid',
+          firmness: 'Medium-Firm',
+          tags: ['Hybrid', 'Luxury', 'Medium-Firm', 'Cooling'],
+          rating: 4.9,
+          reviewCount: 128
+        },
+        {
+          id: '2',
+          name: 'Serenity Memory Foam Mattress',
+          description: 'Sink into plush comfort with our premium memory foam mattress designed for pressure relief.',
+          price: 799,
+          salePrice: 599,
+          images: ['https://images.pexels.com/photos/6782447/pexels-photo-6782447.jpeg'],
+          category: 'Memory Foam',
+          firmness: 'Medium',
+          tags: ['Memory Foam', 'Pressure Relief', 'Medium'],
+          rating: 4.7,
+          reviewCount: 94
+        },
+        {
+          id: '3',
+          name: 'Harmony Organic Latex Mattress',
+          description: 'Natural, eco-friendly latex mattress offering responsive support and breathability.',
+          price: 1499,
+          salePrice: 1199,
+          images: ['https://images.pexels.com/photos/6782453/pexels-photo-6782453.jpeg'],
+          category: 'Latex',
+          firmness: 'Medium-Firm',
+          tags: ['Latex', 'Organic', 'Eco-Friendly', 'Medium-Firm'],
+          rating: 4.8,
+          reviewCount: 76
+        },
+        {
+          id: '4',
+          name: 'Essential Innerspring Mattress',
+          description: 'Classic innerspring design providing traditional bounce and solid support.',
+          price: 599,
+          salePrice: undefined,
+          images: ['https://images.pexels.com/photos/6782571/pexels-photo-6782571.jpeg'],
+          category: 'Innerspring',
+          firmness: 'Firm',
+          tags: ['Innerspring', 'Traditional', 'Firm', 'Budget-Friendly'],
+          rating: 4.5,
+          reviewCount: 112
+        },
+        {
+          id: '5',
+          name: 'Cooling Gel Hybrid Mattress',
+          description: 'Stay cool all night with our temperature-regulating gel hybrid mattress.',
+          price: 999,
+          salePrice: 799,
+          images: ['https://images.pexels.com/photos/6782567/pexels-photo-6782567.jpeg'],
+          category: 'Hybrid',
+          firmness: 'Medium',
+          tags: ['Hybrid', 'Cooling', 'Medium', 'Gel-Infused'],
+          rating: 4.8,
+          reviewCount: 87
+        },
+        {
+          id: '6',
+          name: 'Plush Pillow Top Mattress',
+          description: 'Ultra-plush pillow top for those who prefer a softer sleep surface.',
+          price: 1099,
+          salePrice: 899,
+          images: ['https://images.pexels.com/photos/6782447/pexels-photo-6782447.jpeg'],
+          category: 'Pillow Top',
+          firmness: 'Soft',
+          tags: ['Pillow Top', 'Plush', 'Soft', 'Luxury'],
+          rating: 4.6,
+          reviewCount: 64
+        },
+        {
+          id: '7',
+          name: 'Orthopedic Support Mattress',
+          description: 'Designed for optimal spinal alignment and back support.',
+          price: 1199,
+          salePrice: 999,
+          images: ['https://images.pexels.com/photos/6782453/pexels-photo-6782453.jpeg'],
+          category: 'Orthopedic',
+          firmness: 'Firm',
+          tags: ['Orthopedic', 'Back Support', 'Firm', 'Therapeutic'],
+          rating: 4.9,
+          reviewCount: 53
+        },
+        {
+          id: '8',
+          name: 'Budget Comfort Mattress',
+          description: 'Quality sleep at an affordable price point.',
+          price: 499,
+          salePrice: 399,
+          images: ['https://images.pexels.com/photos/6782571/pexels-photo-6782571.jpeg'],
+          category: 'Foam',
+          firmness: 'Medium',
+          tags: ['Foam', 'Budget', 'Medium', 'Value'],
+          rating: 4.4,
+          reviewCount: 138
+        }
+      ];
+      
+      setProducts(mockProducts);
+      setLoading(false);
+    };
     
-    setProducts(fetchedProducts);
-    setFilteredProducts(fetchedProducts);
-  }, [category, categoryInfo]);
+    fetchProducts();
+  }, []);
   
-  const toggleFilterSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections({
-      ...expandedSections,
-      [section]: !expandedSections[section],
+  const toggleFilter = (filterType: keyof FilterState, value: string) => {
+    setFilters(prevFilters => {
+      const currentFilters = [...prevFilters[filterType] as string[]];
+      const valueIndex = currentFilters.indexOf(value);
+      
+      if (valueIndex === -1) {
+        return {
+          ...prevFilters,
+          [filterType]: [...currentFilters, value]
+        };
+      } else {
+        currentFilters.splice(valueIndex, 1);
+        return {
+          ...prevFilters,
+          [filterType]: currentFilters
+        };
+      }
     });
   };
   
-  const toggleFilter = () => {
-    setIsFilterOpen(!isFilterOpen);
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
   
-  const handleTypeFilter = (type: string) => {
-    const updatedTypes = activeFilters.types.includes(type)
-      ? activeFilters.types.filter(t => t !== type)
-      : [...activeFilters.types, type];
-    
-    setActiveFilters({
-      ...activeFilters,
-      types: updatedTypes,
-    });
-  };
-  
-  const handleFirmnessFilter = (firmness: number) => {
-    const updatedFirmness = activeFilters.firmness.includes(firmness)
-      ? activeFilters.firmness.filter(f => f !== firmness)
-      : [...activeFilters.firmness, firmness];
-    
-    setActiveFilters({
-      ...activeFilters,
-      firmness: updatedFirmness,
-    });
-  };
-  
-  const handlePriceChange = (range: [number, number]) => {
-    setActiveFilters({
-      ...activeFilters,
-      priceRange: range,
-    });
-  };
-  
-  const handleSort = (option: string) => {
-    setSortOption(option);
-    
-    let sortedProducts = [...filteredProducts];
-    
-    switch (option) {
-      case 'price-low':
-        sortedProducts.sort((a, b) => (a.salePrice || a.price) - (b.salePrice || b.price));
-        break;
-      case 'price-high':
-        sortedProducts.sort((a, b) => (b.salePrice || b.price) - (a.salePrice || a.price));
-        break;
-      case 'rating':
-        sortedProducts.sort((a, b) => b.rating - a.rating);
-        break;
-      case 'newest':
-        sortedProducts.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-        break;
-      default: // featured
-        sortedProducts.sort((a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0));
-        break;
-    }
-    
-    setFilteredProducts(sortedProducts);
-  };
-  
-  const applyFilters = () => {
-    let filtered = [...products];
-    
-    // Filter by price
-    filtered = filtered.filter(product => {
-      const price = product.salePrice || product.price;
-      return price >= activeFilters.priceRange[0] && price <= activeFilters.priceRange[1];
-    });
-    
-    // Filter by type
-    if (activeFilters.types.length > 0) {
-      filtered = filtered.filter(product => 
-        activeFilters.types.includes(product.type)
-      );
-    }
-    
-    // Filter by firmness
-    if (activeFilters.firmness.length > 0) {
-      filtered = filtered.filter(product => 
-        activeFilters.firmness.includes(Math.round(product.firmness))
-      );
-    }
-    
-    setFilteredProducts(filtered);
-    
-    // Re-apply current sort
-    handleSort(sortOption);
-    
-    // Close filter on mobile after applying
-    if (window.innerWidth < 768) {
-      setIsFilterOpen(false);
-    }
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilters(prev => ({
+      ...prev,
+      sortBy: e.target.value
+    }));
   };
   
   const resetFilters = () => {
-    setActiveFilters({
-      priceRange: [0, 3000],
-      types: [],
+    setFilters({
+      categories: [],
       firmness: [],
-      features: [],
+      priceRange: [0, 2000],
+      sortBy: 'featured'
     });
-    
-    setFilteredProducts(products);
-    setSortOption('featured');
   };
   
-  // Get unique mattress types from products
-  const mattressTypes = Array.from(new Set(products.map(product => product.type)));
+  // Apply filters to products
+  const filteredProducts = products.filter(product => {
+    // Category filter
+    if (filters.categories.length > 0 && !filters.categories.includes(product.category)) {
+      return false;
+    }
+    
+    // Firmness filter
+    if (filters.firmness.length > 0 && !filters.firmness.includes(product.firmness)) {
+      return false;
+    }
+    
+    // Price range filter
+    const price = product.salePrice || product.price;
+    if (price < filters.priceRange[0] || price > filters.priceRange[1]) {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  // Sort products
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (filters.sortBy) {
+      case 'price-low-high':
+        return (a.salePrice || a.price) - (b.salePrice || b.price);
+      case 'price-high-low':
+        return (b.salePrice || b.price) - (a.salePrice || a.price);
+      case 'rating':
+        return b.rating - a.rating;
+      case 'newest':
+        return parseInt(b.id) - parseInt(a.id);
+      default: // featured
+        return 0;
+    }
+  });
   
   return (
     <div className="pt-20">
-      {/* Category Header */}
-      <div className="bg-neutral-100 py-12">
+      {/* Hero Section */}
+      <section className="bg-neutral-100 py-12">
         <div className="container-custom">
-          <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4">
-            {categoryInfo ? categoryInfo.name : 'All Mattresses'}
-          </h1>
+          <h1 className="text-3xl md:text-4xl font-serif font-bold mb-4">Shop Our Mattresses</h1>
           <p className="text-neutral-600 max-w-3xl">
-            {categoryInfo 
-              ? categoryInfo.description 
-              : 'Browse our complete collection of premium mattresses designed for every sleep style, body type, and budget.'}
+            Find your perfect sleep solution from our curated collection of premium mattresses. 
+            With options for every sleep style and budget, your best night's sleep is just a click away.
           </p>
         </div>
-      </div>
+      </section>
       
-      {/* Product Filtering and Listing */}
       <div className="container-custom py-12">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Filter Toggle (Mobile) */}
-          <div className="md:hidden">
-            <Button 
-              onClick={toggleFilter}
-              variant="outline"
-              fullWidth
-              className="flex items-center justify-center"
-            >
-              <FiFilter className="mr-2" />
-              {isFilterOpen ? 'Hide Filters' : 'Show Filters'}
-            </Button>
-          </div>
-          
-          {/* Filters Sidebar */}
-          <div 
-            className={`w-full md:w-64 flex-shrink-0 transition-all duration-300 ${
-              isFilterOpen || window.innerWidth >= 768 ? 'block' : 'hidden'
-            }`}
+        {/* Mobile Filter Button */}
+        <div className="lg:hidden mb-6">
+          <button
+            onClick={() => setMobileFiltersOpen(true)}
+            className="flex items-center justify-center w-full py-3 border border-neutral-300 rounded-md bg-white shadow-sm text-neutral-700 hover:bg-neutral-50"
           >
-            <div className="bg-white rounded-lg shadow-soft p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">Filters</h2>
-                <button 
-                  onClick={resetFilters}
-                  className="text-sm text-primary-600 hover:text-primary-700"
-                >
-                  Reset All
-                </button>
-              </div>
-              
-              {/* Price Range */}
-              <div className="mb-6 border-b border-neutral-200 pb-6">
-                <button 
-                  className="flex items-center justify-between w-full text-left font-medium mb-4"
-                  onClick={() => toggleFilterSection('price')}
-                >
-                  <span>Price Range</span>
-                  {expandedSections.price ? <FiChevronUp /> : <FiChevronDown />}
-                </button>
+            <FiFilter className="mr-2" />
+            Filter Products
+          </button>
+        </div>
+        
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters - Mobile */}
+          {mobileFiltersOpen && (
+            <div className="fixed inset-0 z-40 lg:hidden">
+              <div className="fixed inset-0 bg-black bg-opacity-25" onClick={() => setMobileFiltersOpen(false)}></div>
+              <div className="relative w-full max-w-xs h-full bg-white shadow-xl flex flex-col">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
+                  <h2 className="text-lg font-medium">Filters</h2>
+                  <button 
+                    onClick={() => setMobileFiltersOpen(false)}
+                    className="text-neutral-500 hover:text-neutral-700"
+                  >
+                    <FiX size={24} />
+                  </button>
+                </div>
                 
-                {expandedSections.price && (
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span>${activeFilters.priceRange[0]}</span>
-                      <span>${activeFilters.priceRange[1]}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="3000"
-                      step="100"
-                      value={activeFilters.priceRange[1]}
-                      onChange={(e) => handlePriceChange([activeFilters.priceRange[0], parseInt(e.target.value)])}
-                      className="w-full"
-                    />
+                <div className="flex-grow overflow-y-auto p-4">
+                  {/* Filter sections - same as desktop but in mobile view */}
+                  {/* Category Filter */}
+                  <div className="mb-6">
+                    <button
+                      className="flex items-center justify-between w-full text-left font-medium mb-2"
+                      onClick={() => toggleSection('categories')}
+                    >
+                      <span>Category</span>
+                      {expandedSections.categories ? <FiChevronUp /> : <FiChevronDown />}
+                    </button>
+                    
+                    {expandedSections.categories && (
+                      <div className="space-y-2">
+                        {['Hybrid', 'Memory Foam', 'Latex', 'Innerspring', 'Pillow Top', 'Orthopedic', 'Foam'].map((category) => (
+                          <label key={category} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={filters.categories.includes(category)}
+                              onChange={() => toggleFilter('categories', category)}
+                              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
+                            />
+                            <span className="ml-2 text-neutral-700">{category}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
+                  
+                  {/* Firmness Filter */}
+                  <div className="mb-6">
+                    <button
+                      className="flex items-center justify-between w-full text-left font-medium mb-2"
+                      onClick={() => toggleSection('firmness')}
+                    >
+                      <span>Firmness</span>
+                      {expandedSections.firmness ? <FiChevronUp /> : <FiChevronDown />}
+                    </button>
+                    
+                    {expandedSections.firmness && (
+                      <div className="space-y-2">
+                        {['Soft', 'Medium', 'Medium-Firm', 'Firm'].map((firmness) => (
+                          <label key={firmness} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={filters.firmness.includes(firmness)}
+                              onChange={() => toggleFilter('firmness', firmness)}
+                              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
+                            />
+                            <span className="ml-2 text-neutral-700">{firmness}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Price Range Filter */}
+                  <div className="mb-6">
+                    <button
+                      className="flex items-center justify-between w-full text-left font-medium mb-2"
+                      onClick={() => toggleSection('priceRange')}
+                    >
+                      <span>Price Range</span>
+                      {expandedSections.priceRange ? <FiChevronUp /> : <FiChevronDown />}
+                    </button>
+                    
+                    {expandedSections.priceRange && (
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <span>${filters.priceRange[0]}</span>
+                          <span>${filters.priceRange[1]}</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="2000"
+                          step="100"
+                          value={filters.priceRange[1]}
+                          onChange={(e) => setFilters(prev => ({
+                            ...prev,
+                            priceRange: [prev.priceRange[0], parseInt(e.target.value)]
+                          }))}
+                          className="w-full"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="border-t border-neutral-200 p-4">
+                  <button
+                    onClick={resetFilters}
+                    className="w-full py-2 text-primary-600 hover:text-primary-700 font-medium"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
               </div>
+            </div>
+          )}
+          
+          {/* Filters - Desktop */}
+          <div className="hidden lg:block w-64 flex-shrink-0">
+            <div className="bg-white rounded-lg shadow-soft p-6 sticky top-24">
+              <h2 className="text-lg font-medium mb-6">Filters</h2>
               
-              {/* Mattress Type */}
-              <div className="mb-6 border-b border-neutral-200 pb-6">
-                <button 
-                  className="flex items-center justify-between w-full text-left font-medium mb-4"
-                  onClick={() => toggleFilterSection('type')}
+              {/* Category Filter */}
+              <div className="mb-6">
+                <button
+                  className="flex items-center justify-between w-full text-left font-medium mb-2"
+                  onClick={() => toggleSection('categories')}
                 >
-                  <span>Mattress Type</span>
-                  {expandedSections.type ? <FiChevronUp /> : <FiChevronDown />}
+                  <span>Category</span>
+                  {expandedSections.categories ? <FiChevronUp /> : <FiChevronDown />}
                 </button>
                 
-                {expandedSections.type && (
+                {expandedSections.categories && (
                   <div className="space-y-2">
-                    {mattressTypes.map((type) => (
-                      <label key={type} className="flex items-center">
+                    {['Hybrid', 'Memory Foam', 'Latex', 'Innerspring', 'Pillow Top', 'Orthopedic', 'Foam'].map((category) => (
+                      <label key={category} className="flex items-center">
                         <input
                           type="checkbox"
-                          checked={activeFilters.types.includes(type)}
-                          onChange={() => handleTypeFilter(type)}
-                          className="mr-2"
+                          checked={filters.categories.includes(category)}
+                          onChange={() => toggleFilter('categories', category)}
+                          className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
                         />
-                        <span>{type}</span>
+                        <span className="ml-2 text-neutral-700">{category}</span>
                       </label>
                     ))}
                   </div>
                 )}
               </div>
               
-              {/* Firmness */}
-              <div className="mb-6 border-b border-neutral-200 pb-6">
-                <button 
-                  className="flex items-center justify-between w-full text-left font-medium mb-4"
-                  onClick={() => toggleFilterSection('firmness')}
+              {/* Firmness Filter */}
+              <div className="mb-6">
+                <button
+                  className="flex items-center justify-between w-full text-left font-medium mb-2"
+                  onClick={() => toggleSection('firmness')}
                 >
                   <span>Firmness</span>
                   {expandedSections.firmness ? <FiChevronUp /> : <FiChevronDown />}
@@ -274,84 +434,184 @@ const ProductsPage = () => {
                 
                 {expandedSections.firmness && (
                   <div className="space-y-2">
-                    {[
-                      { value: 3, label: 'Soft (3-4)' },
-                      { value: 5, label: 'Medium (5-6)' },
-                      { value: 7, label: 'Firm (7-8)' },
-                      { value: 9, label: 'Extra Firm (9-10)' },
-                    ].map((option) => (
-                      <label key={option.value} className="flex items-center">
+                    {['Soft', 'Medium', 'Medium-Firm', 'Firm'].map((firmness) => (
+                      <label key={firmness} className="flex items-center">
                         <input
                           type="checkbox"
-                          checked={activeFilters.firmness.includes(option.value)}
-                          onChange={() => handleFirmnessFilter(option.value)}
-                          className="mr-2"
+                          checked={filters.firmness.includes(firmness)}
+                          onChange={() => toggleFilter('firmness', firmness)}
+                          className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
                         />
-                        <span>{option.label}</span>
+                        <span className="ml-2 text-neutral-700">{firmness}</span>
                       </label>
                     ))}
                   </div>
                 )}
               </div>
               
-              <Button 
-                onClick={applyFilters}
-                variant="primary"
-                fullWidth
+              {/* Price Range Filter */}
+              <div className="mb-6">
+                <button
+                  className="flex items-center justify-between w-full text-left font-medium mb-2"
+                  onClick={() => toggleSection('priceRange')}
+                >
+                  <span>Price Range</span>
+                  {expandedSections.priceRange ? <FiChevronUp /> : <FiChevronDown />}
+                </button>
+                
+                {expandedSections.priceRange && (
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span>${filters.priceRange[0]}</span>
+                      <span>${filters.priceRange[1]}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="2000"
+                      step="100"
+                      value={filters.priceRange[1]}
+                      onChange={(e) => setFilters(prev => ({
+                        ...prev,
+                        priceRange: [prev.priceRange[0], parseInt(e.target.value)]
+                      }))}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <button
+                onClick={resetFilters}
+                className="w-full py-2 text-primary-600 hover:text-primary-700 font-medium"
               >
-                Apply Filters
-              </Button>
+                Reset Filters
+              </button>
             </div>
           </div>
           
-          {/* Product Listing */}
+          {/* Product Grid */}
           <div className="flex-grow">
-            {/* Sort Controls */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-              <p className="text-neutral-600">
-                Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
+            {/* Sort and Results Count */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+              <p className="text-neutral-600 mb-4 sm:mb-0">
+                Showing {sortedProducts.length} {sortedProducts.length === 1 ? 'result' : 'results'}
               </p>
               
               <div className="flex items-center">
                 <label htmlFor="sort" className="mr-2 text-neutral-600">Sort by:</label>
                 <select
                   id="sort"
-                  value={sortOption}
-                  onChange={(e) => handleSort(e.target.value)}
-                  className="border border-neutral-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  value={filters.sortBy}
+                  onChange={handleSortChange}
+                  className="border border-neutral-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   <option value="featured">Featured</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
+                  <option value="price-low-high">Price: Low to High</option>
+                  <option value="price-high-low">Price: High to Low</option>
                   <option value="rating">Highest Rated</option>
                   <option value="newest">Newest</option>
                 </select>
               </div>
             </div>
             
-            {/* Products Grid */}
-            {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((product, index) => (
-                  <ProductCard key={product.id} product={product} index={index} />
-                ))}
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
               </div>
             ) : (
-              <div className="text-center py-12 bg-neutral-50 rounded-lg">
-                <h3 className="text-xl font-medium mb-2">No products found</h3>
-                <p className="text-neutral-600 mb-6">Try adjusting your filters or browse our categories below.</p>
-                <div className="flex flex-wrap justify-center gap-3">
-                  {categories.map((cat) => (
-                    <Button 
-                      key={cat.id}
-                      href={`/products/${cat.slug}`}
-                      variant="outline"
-                    >
-                      {cat.name}
+              <>
+                {sortedProducts.length === 0 ? (
+                  <div className="bg-white rounded-lg shadow-soft p-8 text-center">
+                    <h3 className="text-xl font-medium mb-2">No products found</h3>
+                    <p className="text-neutral-600 mb-6">
+                      Try adjusting your filters to find what you're looking for.
+                    </p>
+                    <Button onClick={resetFilters} variant="primary">
+                      Reset Filters
                     </Button>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {sortedProducts.map((product, index) => (
+                      <motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.1 }}
+                        className="bg-white rounded-lg shadow-soft overflow-hidden group"
+                      >
+                        <Link to={`/product/${product.id}`} className="block relative h-48 overflow-hidden">
+                          <img 
+                            src={product.images[0]} 
+                            alt={product.name} 
+                            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                          />
+                          {product.salePrice && (
+                            <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+                              SALE
+                            </div>
+                          )}
+                        </Link>
+                        
+                        <div className="p-4">
+                          <div className="text-sm text-primary-600 mb-1">{product.category}</div>
+                          <Link to={`/product/${product.id}`}>
+                            <h3 className="font-medium mb-2 group-hover:text-primary-600 transition-colors">
+                              {product.name}
+                            </h3>
+                          </Link>
+                          
+                          <div className="flex items-center mb-2">
+                            <div className="flex">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <svg 
+                                  key={star}
+                                  xmlns="http://www.w3.org/2000/svg" 
+                                  className={`h-4 w-4 ${
+                                    star <= Math.round(product.rating) ? 'text-yellow-400' : 'text-neutral-300'
+                                  }`}
+                                  viewBox="0 0 20 20" 
+                                  fill="currentColor"
+                                >
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                              ))}
+                            </div>
+                            <span className="text-xs text-neutral-500 ml-1">
+                              ({product.reviewCount})
+                            </span>
+                          </div>
+                          
+                          <p className="text-sm text-neutral-600 mb-3 line-clamp-2">
+                            {product.description}
+                          </p>
+                          
+                          <div className="flex items-center justify-between mb-3">
+                            {product.salePrice ? (
+                              <div className="flex items-center">
+                                <span className="font-bold text-lg mr-2">${product.salePrice}</span>
+                                <span className="text-sm text-neutral-500 line-through">${product.price}</span>
+                              </div>
+                            ) : (
+                              <span className="font-bold text-lg">${product.price}</span>
+                            )}
+                            <div className="text-sm text-neutral-600">{product.firmness}</div>
+                          </div>
+                          
+                          <Button 
+                            href={`/product/${product.id}`}
+                            variant="primary"
+                            fullWidth
+                          >
+                            View Details
+                          </Button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -360,17 +620,17 @@ const ProductsPage = () => {
       {/* Help Section */}
       <section className="bg-neutral-50 py-16">
         <div className="container-custom">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-serif font-bold mb-4">Need Help Finding the Perfect Mattress?</h2>
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-2xl font-serif font-bold mb-4">Not Sure Which Mattress Is Right For You?</h2>
             <p className="text-neutral-600 mb-8">
-              Our sleep experts are here to help you find the perfect mattress for your sleep style, preferences, and budget.
+              Take our sleep quiz to find your perfect match, or speak with one of our sleep experts for personalized recommendations.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button href="/sleep-quiz" variant="primary">
-                Take the Sleep Quiz
+                Take Sleep Quiz
               </Button>
               <Button href="/contact" variant="outline">
-                Contact Our Sleep Experts
+                Contact a Sleep Expert
               </Button>
             </div>
           </div>

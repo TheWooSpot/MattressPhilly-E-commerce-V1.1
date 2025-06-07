@@ -93,7 +93,7 @@ const HomePage = () => {
       </section>
       
       {/* Benefits */}
-      <section className="section-padding bg-comfort-pattern bg-cover bg-fixed" ref={benefitsRef}>
+      <section className="section-padding bg-neutral-100" ref={benefitsRef}>
         <div className="container-custom">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4">Why Choose Mattress Philly?</h2>

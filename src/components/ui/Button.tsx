@@ -11,6 +11,8 @@ interface ButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
+  target?: string;
+  rel?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -23,6 +25,8 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   disabled = false,
   className = '',
+  target,
+  rel,
 }) => {
   const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2';
   
@@ -46,7 +50,7 @@ const Button: React.FC<ButtonProps> = ({
   
   if (href) {
     return (
-      <Link to={href} className={buttonClasses}>
+      <Link to={href} className={buttonClasses} target={target} rel={rel}>
         {children}
       </Link>
     );

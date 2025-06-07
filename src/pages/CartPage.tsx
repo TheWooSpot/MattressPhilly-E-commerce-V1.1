@@ -5,8 +5,29 @@ import { FiTrash2, FiPlus, FiMinus, FiArrowLeft, FiShoppingCart } from 'react-ic
 import Button from '../components/ui/Button';
 import { useCartStore } from '../store/cartStore';
 
+interface CartItem {
+  product: {
+    id: string;
+    name: string;
+    images: string[];
+    price: number;
+    salePrice?: number;
+    sizes: Record<string, number>;
+  };
+  quantity: number;
+  size: string;
+}
+
+interface CartStore {
+  items: CartItem[];
+  removeItem: (productId: string, size: string) => void;
+  updateQuantity: (productId: string, size: string, quantity: number) => void;
+  getTotalItems: () => number;
+  getTotalPrice: () => number;
+}
+
 const CartPage = () => {
-  const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice } = useCartStore();
+  const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice } = useCartStore() as CartStore;
   
   useEffect(() => {
     document.title = 'Your Cart | Mattress Philly';
@@ -179,7 +200,12 @@ const CartPage = () => {
             <div className="mt-6 space-y-4">
               <div className="flex items-start">
                 <div className="text-primary-600 mr-3">
-                  <FiTruck />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="1" y="3" width="15" height="13"></rect>
+                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                  </svg>
                 </div>
                 <div>
                   <h4 className="font-medium text-sm">Free White Glove Delivery</h4>
