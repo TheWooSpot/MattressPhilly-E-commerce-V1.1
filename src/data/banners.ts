@@ -23,6 +23,6 @@ export const banners: BannerItem[] = [
     subtitle: "Explore our collection of organic and eco-friendly mattresses",
     buttonText: "Go Green",
     buttonLink: "/products/latex",
-    image: "https://images.pexels.com/photos/6782453/pexels-photo-6782453.jpeg"
+    image: "https://images.pexels.com/photos/5824901/pexels-photo-5824901.jpeg"
   }
 ];
